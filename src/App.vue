@@ -1,31 +1,86 @@
 <script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
-</script>
 
-<template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
-</template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+  import { ref } from 'vue'
+  import { useStorage } from '@vueuse/core'
+  import { nanoid } from 'nanoid'
+  
+  import confetti from 'canvas-confetti'
+  
+  const newGrocery = ref('')
+  const groceries = useStorage('groceries', [])
+    const addGrocery = () => {
+      if (newGrocery.value){
+        groceries.value.push({id: nanoid(), name: newGrocery.value})
+        newGrocery.value =''
+      }
+    }
+  
+    const deleteGrocery= id => {
+      const removeIndex = groceries.value.findIndex(grocery=> grocery.id === id)
+     groceries.value.splice(removeIndex, 1)
+     confetti({particleCount:300, spread:1000, origin: { y:1 }})
+    }
+  </script>
+  
+  
+  
+  <template>
+    <main>
+   <h1 class ="title">Vue Grocery List</h1>
+   <form class="newGroceryForm" @submit.prevent="addGrocery">
+          <input 
+              id="newGrocery" 
+              autocomplete="off"
+              type="text" 
+              placeholder="Add an item to your list"
+              v-model ="newGrocery"
+              />
+              
+          <button type = "submit"> Add</button>
+      </form>
+      
+      <form>
+        <ul>
+          <li v-for= "grocery in groceries" @click="deleteGrocery(grocery.id)">{{ grocery.name }}</li>
+        </ul>
+      </form>
+      <h3>Pending Items: {{groceries.length}}</h3>
+  </main>
+  
+  
+  </template>
+  
+  <style lang="postcss" scoped>
+  main{
+    @apply mt-8 flex flex-col justify-center items-center;
+  
+    .title{
+      @apply m-2 text-6xl font-light tracking-wider text-accent;
+    }
+      form{
+        @apply mt-8 flex focus-within:ring-8 focus-within:ring-accent focus-within:rounded-lg;
+       
+        input{
+          @apply bg-white text-comment p-2 w-80 text-2xl rounded-l-md outline-none;
+        }
+        
+        button{
+          @apply bg-accent text-background p-2 text-2xl font-bold rounded-r-md;
+          &:hover{
+            @apply bg-foreground;
+          }
+        }
+      }
+        ul {
+             @apply flex flex-col items-center justify-center rounded-lg bg-accent;
+            li{
+              @apply bg-white text-background m-2 p-2 w-96 text-center;
+              &:hover{
+                @apply bg-foreground font-bold cursor-pointer;
+              }
+        }  
+        
+    }
+  }
+  </style>
+  
